@@ -1,0 +1,159 @@
+<link rel="import" href="../polymer/polymer.html"> 
+<link rel="import" href="../th-theme/th-theme.html"> 
+<link rel="import" href="../core-input/core-input.html"> 
+<link rel="import" href="../core-selector/core-selector.html"> 
+<link rel="import" href="../core-item/core-item.html"> 
+<link rel="import" href="../core-dropdown/core-dropdown.html"> 
+<link rel="import" href="../core-dropdown-menu/core-dropdown-menu.html"> 
+
+<!--
+A Thelma component providing solution to no problem in particular.
+
+##### Example
+
+    <th-date-convert></th-date-convert>
+
+@element th-date-convert
+@blurb Element providing solution to no problem in particular.
+@status alpha
+@homepage http://nishacodes.github.io/th-date-convert
+-->
+
+<polymer-element name="th-date-convert" attributes="input output dateColumn dateTypeFrom dateTypeTo">
+  <template>
+    <core-style ref="theme"></core-style>
+    <link rel="stylesheet" href="th-date-convert.css">
+  
+    <!-- Column Selection -->
+    <strong>Date Column:</strong>
+    <core-selector selected="{{dateColumn}}" valueattr="label">
+      <template repeat="{{attr in _dataAttributes}}">
+        <div class="col" label="{{attr}}">{{attr}}</div>
+      </template>
+    </core-selector>
+    <br>
+    
+    <!-- FROM Date Type Selection -->
+    <strong>From:</strong>
+    <core-dropdown-menu class="dropdown-menu" label="Select a date format:">
+      <core-dropdown class="dropdown">
+          <core-selector selected="{{dateTypeFrom}}"  valueattr="label">
+             <!-- TODO: ADD FIELD TO TYPE IN CUSTOM FORMAT -->
+            <template repeat="{{format in dateFormats}}">
+              <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+            </template>
+          </core-selector>
+      </core-dropdown>
+    </core-dropdown-menu>
+    <br>
+    
+    <!-- TO Date Type Selection -->
+    <strong>To:</strong>
+    <core-dropdown-menu class="dropdown-menu" label="Select a date format:">
+      <core-dropdown class="dropdown" >
+          <core-selector selected="{{dateTypeTo}}" valueattr="label">
+              <!-- TODO: ADD FIELD TO TYPE IN CUSTOM FORMAT -->
+            <template repeat="{{format in dateFormats}}">
+              <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+            </template>
+          </core-selector>
+      </core-dropdown>
+    </core-dropdown-menu>
+    <br>
+    <template if="{{errors.length}}">
+     <p><strong>{{errors.length}} date(s) could not be converted due to invalid format:</strong></p>
+     <template repeat="{{error in errors}}">
+       <li>{{error.date}} (row: {{error.row}})</li>
+     </template>
+   </template>
+  </template>
+  <script src="../moment/min/moment.min.js"></script>
+  <script>
+    Polymer({
+      input: [
+        { date: 'Q2 2012', place: 'ny'},
+        { date: 'Q1 2012', place: 'sf'}
+      ],
+      dateFormats: [ 
+        { type: 'YYYY MM DD', example: '2015 01 31'},
+        { type: 'MMMM DD YYYY', example: 'January 31, 2015'},
+        { type: 'MMM DD YYYY', example: 'Jan 31, 2015'},
+        { type: 'MM-DD-YYYY', example: '01-31-2015'},
+        { type: 'MM-DD-YY', example: '01-31-15'},
+        { type: 'MMMM YYYY', example: 'January 2015'},
+        { type: 'MMM YYYY', example: 'Jan 2015'},
+        { type: 'MM-YYYY', example: '01-2015'},
+        { type: 'MM-YY', example: '01-15'},
+        { type: 'M-D-YYYY', example: '1-31-2015'},
+        { type: 'M-D-YY', example: '1-31-15'},
+        { type: 'DD MMMM YYYY', example: '31 January 2015'},
+        { type: 'DD-MM-YY', example: '31-01-15'},
+        { type: 'D-M-YYYY', example: '31-1-2015'},
+        { type: 'D-M-YY', example: '31-1-15'},
+        { type: 'MMM-DD', example: 'Jan-31'},
+        { type: 'MM-DD', example: '01-31'},
+        { type: 'M-D', example: '1-31'},
+        { type: 'Q YYYY', example: 'Q1 2015'}
+        
+        
+        // TODO: ADD MORE DATE FORMATS
+      ],
+      output: [],
+      keepOriginalData: true,
+      errors: [],
+      ready: function () {
+
+        this.inputChanged();
+        
+      },
+      mapOutput: function(){
+        var self = this,
+            inputLength = self.input.length;
+      
+        for (var i=0; i<self.input.length;i++){
+          var newColName= self.newColName(self.dateColumn, self.dateTypeTo),
+              newDate = self.convertDate(self.input[i][self.dateColumn], self.dateTypeFrom, self.dateTypeTo);
+          self.output[i] = self.input[i];   // TODO: fix this so it clones instead of references
+          if (newDate){       
+            self.output[i][newColName] = newDate;
+            console.log(newDate);
+          } else {
+            self.errors.push({row: i+1, date: self.input[i][self.dateColumn]})
+          }
+        }
+        
+        self.fire('th-output-ready', self.output);
+      },
+      newColName: function(oldColName, newFormat){
+        return oldColName + " (" + newFormat + ")";
+      },
+      convertDate: function(date, currentFormat, newFormat){
+        return moment(date,currentFormat).isValid() ? moment(date, currentFormat).format(newFormat) : "";
+        
+      },
+      inputChanged: function(){
+        var self = this;
+        var firstItem = self.input[0];
+        if(!firstItem) {
+          return;
+        }
+        self._dataAttributes = Object.keys(firstItem);
+      },
+      dateTypeFromChanged: function(){
+        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
+          this.mapOutput();
+        }
+      },
+      dateTypeToChanged: function(){
+        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
+          this.mapOutput();
+        }
+      },
+      dateColumnChanged: function(){
+        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
+          this.mapOutput();
+        }
+      }
+    });
+  </script>
+</polymer-element>

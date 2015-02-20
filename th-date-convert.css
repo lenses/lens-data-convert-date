@@ -1,0 +1,55 @@
+:host {
+  display: inline-block;
+  color: black;
+}
+
+core-selector {
+  min-height: 10px;
+  display: inline-block;
+  max-height: 123px;
+}
+
+core-selector .col {
+  display: inline-block;
+  margin: 0 3px;
+  padding: 1px;
+  border: 1px solid #EEE;
+}
+core-selector .core-selected {
+  background-color: #ccc;
+
+}
+label {
+  vertical-align: top;
+}
+
+.dropdown-menu {
+  margin: 5px 0px;
+}
+
+.dropdown {
+  border: 1px solid #eee;
+  z-index: 12;
+  left: 0px;
+  top: 20px;
+  box-sizing: border-box;
+  max-height: 150px;
+  max-width: 300px;
+  overflow-y: scroll;
+  cursor: pointer;
+}
+
+.small {
+  font-size: 0.75em;
+}
+
+.dateItem {
+  display: block;
+  margin: 5px;
+  
+}
+
+.dateItem:hover {
+  background-color: #eee;
+  
+}

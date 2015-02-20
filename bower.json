@@ -1,0 +1,12 @@
+{
+  "name": "th-date-convert",
+  "version": "0.0.0",
+  "keywords": "thelma, polymer, web-components",
+  "main": "th-date-convert.html",
+  "dependencies": {
+    "th-theme": "thelmanews/th-theme",
+    "polymer": "Polymer/polymer#~0.5.1",
+    "moment": "~2.8.3",
+    "core-dropdown-menu": "polymer/core-dropdown-menu#~0.5.5"
+  }
+}
