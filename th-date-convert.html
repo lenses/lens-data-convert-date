@@ -48,7 +48,9 @@ A Thelma component providing solution to no problem in particular.
       </template>
     </core-selector>
     <input id="dateTypeTo" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeTo}}">
-  
+    
+    <p class="small">For more info on date formats, click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a> </p>
+    
     <template if="{{errors.length}}">
      <p><strong>{{errors.length}} date(s) could not be converted due to invalid format:</strong></p>
      <template repeat="{{error in errors}}">
@@ -59,10 +61,7 @@ A Thelma component providing solution to no problem in particular.
   <script src="../moment/min/moment.min.js"></script>
   <script>
     Polymer({
-      input: [
-        { date: 'Q2 2012', place: 'ny'},
-        { date: 'Q1 2012', place: 'sf'}
-      ],
+      input: [],
       dateFormats: [ 
         { type: 'YYYY MM DD', example: '2015 01 31'},
         { type: 'MMMM DD YYYY', example: 'January 31, 2015'},
@@ -87,36 +86,34 @@ A Thelma component providing solution to no problem in particular.
       output: [],
       keepOriginalData: true,
       ready: function () {
-
         this.inputChanged();
-        
       },
       mapOutput: function(){
         var self = this,
             inputLength = self.input.length;
           
-          self.errors = [];
+        self.errors = [];
+        
+        // Remapping triggers the change in an observer
+        self.output = self.input.map(function(item, index){
           
-          // Remapping triggers the change in an observer
-          self.output = self.input.map(function(item, index){
-            
-            var newColName= self.newColName(self.dateColumn, self.dateTypeTo),
-                newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo),
-                row = {},
-                keys = Object.keys(item);
-            
-            keys.forEach(function(key) {
-              row[key] = item[key];
-            });
+          var newColName= self.newColName(self.dateColumn, self.dateTypeTo),
+              newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo),
+              row = {},
+              keys = Object.keys(item);
           
-            if (newDate){
-              row[newColName] = newDate
-            } else {
-              self.errors.push({row: index+1, date: item[self.dateColumn]})
-            }
+          keys.forEach(function(key) {
+            row[key] = item[key];
+          });
+        
+          if (newDate){
+            row[newColName] = newDate
+          } else {
+            self.errors.push({row: index+1, date: item[self.dateColumn]})
+          }
 
-            return row;
-          })
+          return row;
+        })
         
       },
       newColName: function(oldColName, newFormat){
