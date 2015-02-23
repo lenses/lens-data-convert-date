@@ -3,8 +3,7 @@
 <link rel="import" href="../core-input/core-input.html"> 
 <link rel="import" href="../core-selector/core-selector.html"> 
 <link rel="import" href="../core-item/core-item.html"> 
-<link rel="import" href="../core-dropdown/core-dropdown.html"> 
-<link rel="import" href="../core-dropdown-menu/core-dropdown-menu.html"> 
+<link rel="import" href="../core-input/core-input.html"> 
 
 <!--
 A Thelma component providing solution to no problem in particular.
@@ -23,43 +22,33 @@ A Thelma component providing solution to no problem in particular.
   <template>
     <core-style ref="theme"></core-style>
     <link rel="stylesheet" href="th-date-convert.css">
-  
+
     <!-- Column Selection -->
-    <strong>Date Column:</strong>
+    <label> Date column:</label>
     <core-selector selected="{{dateColumn}}" valueattr="label">
       <template repeat="{{attr in _dataAttributes}}">
         <div class="col" label="{{attr}}">{{attr}}</div>
       </template>
     </core-selector>
-    <br>
     
     <!-- FROM Date Type Selection -->
-    <strong>From:</strong>
-    <core-dropdown-menu class="dropdown-menu" label="Select a date format:">
-      <core-dropdown class="dropdown">
-          <core-selector selected="{{dateTypeFrom}}"  valueattr="label">
-             <!-- TODO: ADD FIELD TO TYPE IN CUSTOM FORMAT -->
-            <template repeat="{{format in dateFormats}}">
-              <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
-            </template>
-          </core-selector>
-      </core-dropdown>
-    </core-dropdown-menu>
-    <br>
+    <label>Select current format:</label>
+    <core-selector class="selector" selected="{{dateTypeFrom}}"  valueattr="label">
+      <template repeat="{{format in dateFormats}}">
+        <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+      </template>
+    </core-selector>
+    <input id="dateTypeFrom" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeFrom}}">
     
     <!-- TO Date Type Selection -->
-    <strong>To:</strong>
-    <core-dropdown-menu class="dropdown-menu" label="Select a date format:">
-      <core-dropdown class="dropdown" >
-          <core-selector selected="{{dateTypeTo}}" valueattr="label">
-              <!-- TODO: ADD FIELD TO TYPE IN CUSTOM FORMAT -->
-            <template repeat="{{format in dateFormats}}">
-              <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
-            </template>
-          </core-selector>
-      </core-dropdown>
-    </core-dropdown-menu>
-    <br>
+    <label>Select new format:</label>
+    <core-selector class="selector" selected="{{dateTypeTo}}" valueattr="label">
+      <template repeat="{{format in dateFormats}}">
+        <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+      </template>
+    </core-selector>
+    <input id="dateTypeTo" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeTo}}">
+  
     <template if="{{errors.length}}">
      <p><strong>{{errors.length}} date(s) could not be converted due to invalid format:</strong></p>
      <template repeat="{{error in errors}}">
@@ -93,14 +82,10 @@ A Thelma component providing solution to no problem in particular.
         { type: 'MMM-DD', example: 'Jan-31'},
         { type: 'MM-DD', example: '01-31'},
         { type: 'M-D', example: '1-31'},
-        { type: 'Q YYYY', example: 'Q1 2015'}
-        
-        
-        // TODO: ADD MORE DATE FORMATS
+        { type: 'Q YYYY', example: 'Q1 2015'}        
       ],
       output: [],
       keepOriginalData: true,
-      errors: [],
       ready: function () {
 
         this.inputChanged();
@@ -109,20 +94,30 @@ A Thelma component providing solution to no problem in particular.
       mapOutput: function(){
         var self = this,
             inputLength = self.input.length;
-      
-        for (var i=0; i<self.input.length;i++){
-          var newColName= self.newColName(self.dateColumn, self.dateTypeTo),
-              newDate = self.convertDate(self.input[i][self.dateColumn], self.dateTypeFrom, self.dateTypeTo);
-          self.output[i] = self.input[i];   // TODO: fix this so it clones instead of references
-          if (newDate){       
-            self.output[i][newColName] = newDate;
-            console.log(newDate);
-          } else {
-            self.errors.push({row: i+1, date: self.input[i][self.dateColumn]})
-          }
-        }
+          
+          self.errors = [];
+          
+          // Remapping triggers the change in an observer
+          self.output = self.input.map(function(item, index){
+            
+            var newColName= self.newColName(self.dateColumn, self.dateTypeTo),
+                newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo),
+                row = {},
+                keys = Object.keys(item);
+            
+            keys.forEach(function(key) {
+              row[key] = item[key];
+            });
+          
+            if (newDate){
+              row[newColName] = newDate
+            } else {
+              self.errors.push({row: index+1, date: item[self.dateColumn]})
+            }
+
+            return row;
+          })
         
-        self.fire('th-output-ready', self.output);
       },
       newColName: function(oldColName, newFormat){
         return oldColName + " (" + newFormat + ")";

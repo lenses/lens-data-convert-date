@@ -3,6 +3,18 @@
   color: black;
 }
 
+label {
+  vertical-align: top;
+  margin-top: 15px;
+  display: block;
+  color: #2fa3af;
+  font-weight: 600;
+}
+
+.small {
+  font-size: 0.75em;
+}
+
 core-selector {
   min-height: 10px;
   display: inline-block;
@@ -19,37 +31,36 @@ core-selector .core-selected {
   background-color: #ccc;
 
 }
-label {
-  vertical-align: top;
-}
 
-.dropdown-menu {
-  margin: 5px 0px;
-}
-
-.dropdown {
-  border: 1px solid #eee;
-  z-index: 12;
-  left: 0px;
-  top: 20px;
-  box-sizing: border-box;
-  max-height: 150px;
-  max-width: 300px;
-  overflow-y: scroll;
+.selector {
+  min-height: 10px;
+  max-height: 100px;
+  overflow-y: scroll; 
+  display: inline-block;
+  border: 1px solid #EEE;
+  width: 265px;
   cursor: pointer;
 }
 
-.small {
-  font-size: 0.75em;
+.selector div {
+  padding: 1px;
+  display: inline-block;
+  margin: 0 3px;
+  padding: 1px;
 }
 
-.dateItem {
-  display: block;
-  margin: 5px;
-  
-}
-
-.dateItem:hover {
+.selector div:hover {
   background-color: #eee;
-  
+}
+
+.selector .core-selected {
+  background-color: #ccc;
+}
+
+#dateTypeFrom, #dateTypeTo {
+  border: 2px solid #eee; 
+  padding: 3px; 
+  width:259px; 
+  font-size: 0.8em;
+  display: block;
 }
