@@ -1,8 +1,8 @@
 {
-  "name": "th-date-convert",
+  "name": "lens-data-convert-date",
   "version": "0.0.0",
-  "keywords": "thelma, polymer, web-components",
-  "main": "th-date-convert.html",
+  "keywords": "lenses, polymer, web-components",
+  "main": "lens-data-convert-date.html",
   "dependencies": {
     "th-theme": "thelmanews/th-theme",
     "polymer": "Polymer/polymer#~0.5.1",
