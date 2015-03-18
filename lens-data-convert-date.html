@@ -150,14 +150,18 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
         
         // Remapping triggers the change in an observer
         self.output = self.input.map(function(item, index){
-          
           var newColName= self.newColName(self.dateColumn, self.dateTypeTo),
               newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo),
               row = {},
               keys = Object.keys(item);
           
           keys.forEach(function(key) {
-            row[key] = item[key];
+
+            // if not keeping original data, do not include the original column
+            if(!self.keepOriginalData && key === self.dateColumn){
+            } else {
+              row[key] = item[key];
+            }
           });
         
           if (newDate){
@@ -199,7 +203,12 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
         if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
           this._calculateOutput();
         }
+      },
+      keepOriginalDataChanged: function() {
+        console.log('changed');
+        this._calculateOutput();
       }
+
     });
   </script>
 </polymer-element>
