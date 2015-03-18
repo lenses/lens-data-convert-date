@@ -2,20 +2,18 @@
 <link rel="import" href="../th-theme/th-theme.html"> 
 <link rel="import" href="../core-input/core-input.html"> 
 <link rel="import" href="../core-selector/core-selector.html"> 
-<link rel="import" href="../core-item/core-item.html"> 
-<link rel="import" href="../core-input/core-input.html"> 
 
 <!--
-A Thelma component providing solution to no problem in particular.
+A data component for converting dates.
 
 ##### Example
 
     <lens-data-convert-date></lens-data-convert-date>
 
 @element lens-data-convert-date
-@blurb Element providing solution to no problem in particular.
+@blurb A data component for converting dates.
 @status alpha
-@homepage http://nishacodes.github.io/lens-data-convert-date
+@homepage http://lenses.github.io/lens-data-convert-date
 -->
 
 <polymer-element name="lens-data-convert-date" attributes="input output dateColumn dateTypeFrom dateTypeTo">
@@ -23,40 +21,44 @@ A Thelma component providing solution to no problem in particular.
     <core-style ref="theme"></core-style>
     <link rel="stylesheet" href="lens-data-convert-date.css">
 
-    <!-- Column Selection -->
-    <label> Date column:</label>
-    <core-selector selected="{{dateColumn}}" valueattr="label">
-      <template repeat="{{attr in _dataAttributes}}">
-        <div class="col" label="{{attr}}">{{attr}}</div>
+    <div class="lens-container lens-data"></div>
+      <!-- Column Selection -->
+      <label> Date column:</label>
+      <core-selector selected="{{dateColumn}}" valueattr="label">
+        <template repeat="{{attr in _dataAttributes}}">
+          <div class="col" label="{{attr}}">{{attr}}</div>
+        </template>
+      </core-selector>
+      
+      <!-- FROM Date Type Selection -->
+      <label>Select current format:</label>
+      <core-selector class="selector" selected="{{dateTypeFrom}}"  valueattr="label">
+        <template repeat="{{format in dateFormats}}">
+          <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+        </template>
+      </core-selector>
+      <input id="dateTypeFrom" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeFrom}}">
+      
+      <!-- TO Date Type Selection -->
+      <label>Select new format:</label>
+      <core-selector class="selector" selected="{{dateTypeTo}}" valueattr="label">
+        <template repeat="{{format in dateFormats}}">
+          <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+        </template>
+      </core-selector>
+      <input id="dateTypeTo" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeTo}}">
+      
+      <p class="small">For more info on date formats, click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a> </p>
+      
+      <template if="{{errors.length}}">
+        <p><strong>{{errors.length}} date(s) could not be converted due to invalid format:</strong></p>
+        <template repeat="{{error in errors}}">
+          <li>{{error.date}} (row: {{error.row}})</li>
+        </template>
       </template>
-    </core-selector>
-    
-    <!-- FROM Date Type Selection -->
-    <label>Select current format:</label>
-    <core-selector class="selector" selected="{{dateTypeFrom}}"  valueattr="label">
-      <template repeat="{{format in dateFormats}}">
-        <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
-      </template>
-    </core-selector>
-    <input id="dateTypeFrom" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeFrom}}">
-    
-    <!-- TO Date Type Selection -->
-    <label>Select new format:</label>
-    <core-selector class="selector" selected="{{dateTypeTo}}" valueattr="label">
-      <template repeat="{{format in dateFormats}}">
-        <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
-      </template>
-    </core-selector>
-    <input id="dateTypeTo" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeTo}}">
-    
-    <p class="small">For more info on date formats, click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a> </p>
-    
-    <template if="{{errors.length}}">
-     <p><strong>{{errors.length}} date(s) could not be converted due to invalid format:</strong></p>
-     <template repeat="{{error in errors}}">
-       <li>{{error.date}} (row: {{error.row}})</li>
-     </template>
-   </template>
+
+    </div> <!-- end lens-container-->
+
   </template>
   <script src="../moment/min/moment.min.js"></script>
   <script>
@@ -81,14 +83,14 @@ A Thelma component providing solution to no problem in particular.
         { type: 'MMM-DD', example: 'Jan-31'},
         { type: 'MM-DD', example: '01-31'},
         { type: 'M-D', example: '1-31'},
-        { type: 'Q YYYY', example: 'Q1 2015'}        
+        { type: 'Q YYYY', example: 'Q1 2015'}
       ],
       output: [],
       keepOriginalData: true,
       ready: function () {
         this.inputChanged();
       },
-      mapOutput: function(){
+      _calculateOutput: function(){
         var self = this,
             inputLength = self.input.length;
           
@@ -133,17 +135,17 @@ A Thelma component providing solution to no problem in particular.
       },
       dateTypeFromChanged: function(){
         if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
-          this.mapOutput();
+          this._calculateOutput();
         }
       },
       dateTypeToChanged: function(){
         if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
-          this.mapOutput();
+          this._calculateOutput();
         }
       },
       dateColumnChanged: function(){
         if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
-          this.mapOutput();
+          this._calculateOutput();
         }
       }
     });

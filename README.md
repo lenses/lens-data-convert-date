@@ -1,3 +1,5 @@
 # lens-data-convert-date
 
-See the [component page](http://nishacodes.github.io/lens-data-convert-date) for more information.
+A data component for converting dates using moment.js
+
+See the [component page](http://lenses.github.io/lens-data-convert-date) for more information.
