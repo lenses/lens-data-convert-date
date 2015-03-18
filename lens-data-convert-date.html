@@ -4,7 +4,8 @@
 <link rel="import" href="../core-selector/core-selector.html"> 
 
 <!--
-A data component for converting dates.
+A data component for converting dates with moment.js. For more info on date formats,
+click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a>.
 
 ##### Example
 
@@ -63,6 +64,13 @@ A data component for converting dates.
   <script src="../moment/min/moment.min.js"></script>
   <script>
     Polymer({
+      /**
+       *  Input data
+       *
+       *  @property input
+       *  @type Array
+       *  @default [ ]
+       */
       input: [],
       dateFormats: [ 
         { type: 'YYYY MM DD', example: '2015 01 31'},
@@ -85,7 +93,51 @@ A data component for converting dates.
         { type: 'M-D', example: '1-31'},
         { type: 'Q YYYY', example: 'Q1 2015'}
       ],
+
+      /**
+       *  Output data
+       *
+       *  @property output
+       *  @type Array
+       *  @default [ ]
+       */
       output: [],
+
+      /**
+       *  Name of the column that contains dates to-be-converted.
+       *
+       *  @property dateColumn
+       *  @type String
+       *  @default null
+       */
+
+      /**
+       *  Original format of the dates to-be-converted. I.e. use
+       *  'DD MMMM YYYY' for dates in the style of '31 January 2015'
+       *
+       *  @property dateTypeFrom
+       *  @type String
+       *  @default ""
+       */
+
+      /**
+       *  Output format of the converted dates. I.e. use
+       *  'MM-DD-YY' for dates in the style of '01-31-15.'
+       *
+       *  @property dateTypeTo
+       *  @type String
+       *  @default ""
+       */
+
+      /**
+       *  If false, the original data will be replaced by the new data.
+       *  If true, original data will be included in the output alongside
+       *  the new data.
+       *
+       *  @property keepOriginalData
+       *  @type {Boolean}
+       *  @default true
+       */
       keepOriginalData: true,
       ready: function () {
         this.inputChanged();
