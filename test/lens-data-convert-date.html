@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+  <title>lens-data-convert-date</title>
+
+  <script src='../../webcomponentsjs/webcomponents.js'></script>
+  <script src='../../web-component-tester/browser.js'></script>
+
+  <link rel='import' href='../lens-data-convert-date.html'>
+
+</head>
+<body>
+
+  <lens-data-convert-date id='data-convert-date'></lens-data-convert-date>
+
+  <script>
+    var should = chai.should();
+    var component = document.querySelector('lens-data-convert-date');
+
+    // some input data
+    var input = new Object([
+      {"index":1, "state":"Texas","dollar":"$139,000", "date":"1-2-1910"},
+      {"index":2, "state":"Texas","dollar":"$15,300", "date":"2-12-2010"},
+      {"index":3, "state":"New York","dollar":"$205,800","date":"5-12-2015"},
+      {"index":4, "state":"New York","dollar":"$1,180,700","date":"12-12-2012"},
+      {"index":5, "state":"Texas","dollar":"$188,400","date":"1-1-2015"},
+      {"index":6, "state":"Alaska","dollar":"$145,900","date":"1-2-1910"}
+      ]);
+
+    // testing suite
+    suite('<lens-data-convert-date>', function() {
+
+      test('component can be created and exist', function(done) {
+        should.exist(component);
+        done();
+      });
+
+      test('accepts input', function(done) {
+        component.input = input
+        component.input.should.equal(input);
+        done();
+      });
+
+      test('can set dateColumn', function(done) {
+        component.dateColumn = 'date';
+        component.dateColumn.should.equal('date');
+        done();
+      });
+
+      test('can set dateTypeFrom', function(done) {
+        component.dateTypeFrom = 'D-M-YYYY';
+        component.dateTypeFrom.should.equal('D-M-YYYY');
+        done();
+      });
+
+      test('can set dateTypeTo, triggers expected output', function(done) {
+        component.dateTypeTo = 'MMMM DD, YY';
+
+        flush(function() {
+          component.output[0].date.should.equal(input[0].date);
+          component.output[0]['date (MMMM DD, YY)'].should.equal('February 01, 10');
+          done();
+        });
+      });
+
+      // test('keepOriginalData can be false', function(done) {
+      //   component.keepOriginalData = false;
+
+      //   flush(function() {
+      //     console.log(component.output[0]);
+      //     done();
+      //   });
+
+      // });
+
+  });
+
+  </script>
+
+</body>
+</html>
