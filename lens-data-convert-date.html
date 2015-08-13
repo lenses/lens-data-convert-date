@@ -6,14 +6,11 @@
 A data component for converting dates with moment.js. For more info on date formats,
 click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a>.
 
-##### Example
+Example:
 
     <lens-data-convert-date></lens-data-convert-date>
 
-@element lens-data-convert-date
-@blurb A data component for converting dates.
-@status alpha
-@homepage http://lenses.github.io/lens-data-convert-date
+@demo
 -->
 
 <dom-module id="lens-data-convert-date">
@@ -122,7 +119,7 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
       <!-- FROM Date Type Selection -->
       <label>Select current format:</label>
       <iron-selector class="selector" selected="{{dateTypeFrom}}" attr-for-selected="label">
-        <template is="dom-repeat" items="{{dateFormats}}" as="format">
+        <template is="dom-repeat" items="{{_dateFormats}}" as="format">
           <div class="dateItem" label="{{format.type}}"><span>{{format.type}}</span> <span class="small">(i.e. <span>{{format.example}}</span>)</span></div>
         </template>
       </iron-selector>
@@ -131,7 +128,7 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
       <!-- TO Date Type Selection -->
       <label>Select new format:</label>
       <iron-selector class="selector" selected="{{dateTypeTo}}" attr-for-selected="label">
-        <template is="dom-repeat" items="{{dateFormats}}" as="format">
+        <template is="dom-repeat" items="{{_dateFormats}}" as="format">
           <div class="dateItem" label="{{format.type}}"><span>{{format.type}}</span> <span class="small">(i.e. <span>{{format.example}}</span>)</span></div>
         </template>
       </iron-selector>
@@ -154,12 +151,49 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
     Polymer({
       is: 'lens-data-convert-date',
       properties: {
+        /**
+         * Input data, where each item in the array is an object
+         * @type Array
+         * @default []
+         */
+        input: {
+          type: Array,
+          value: [],
+          observer: '_inputChanged'
+        },
+        /**
+         * Output data, where each item in the array is an object
+         * @type Array
+         * @default []
+         */
+        output: {
+          type: Array,
+          value: [],
+          notify: true,
+          readOnly: true,
+          observer: '_outputChanged'
+        },
         dateColumn: {
           notify: true,
-          observer: 'dateColumnChanged'
+          observer: '_calculateOutput'
         },
-        dateFormats: {
+        dateTypeFrom: {
+          notify: true,
+          observer: '_calculateOutput'
+        },
+        dateTypeTo: {
+          notify: true,
+          observer: '_calculateOutput'
+        },
+  
+        keepOriginalData: {
+          type: Boolean,
+          value: true,
+          observer: '_calculateOutput'
+        },
+        _dateFormats: {
           type: Array,
+          readOnly: true,
           value: function () {
             return [
               {
@@ -240,62 +274,44 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
               }
             ];
           }
-        },
-        dateTypeFrom: {
-          notify: true,
-          observer: 'dateTypeFromChanged'
-        },
-        dateTypeTo: {
-          notify: true,
-          observer: 'dateTypeToChanged'
-        },
-        input: {
-          type: Array,
-          value: function () {
-            return [];
-          },
-          notify: true,
-          observer: 'inputChanged'
-        },
-        keepOriginalData: {
-          type: Boolean,
-          value: true,
-          observer: 'keepOriginalDataChanged'
-        },
-        output: {
-          type: Array,
-          value: function () {
-            return [];
-          },
-          notify: true
         }
       },
       ready: function () {
-        this.inputChanged();
+        this._inputChanged();
       },
       _calculateOutput: function () {
-        var self = this, inputLength = self.input.length;
-        self.errors = [];
-        // Remapping triggers the change in an observer
-        self.output = self.input.map(function (item, index) {
-          var newColName = self.newColName(self.dateColumn, self.dateTypeTo), newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo), row = {}, keys = Object.keys(item);
-          keys.forEach(function (key) {
-            // if not keeping original data, do not include the original column
-            if (!self.keepOriginalData && key === self.dateColumn) {
-            } else {
-              row[key] = item[key];
-            }
-          });
-          if (newDate) {
-            row[newColName] = newDate;
-          } else {
-            self.errors.push({
-              row: index + 1,
-              date: item[self.dateColumn]
+        var self = this, 
+            inputLength = self.input.length;
+        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn) {
+          self.errors = [];
+          console.log(self.input);
+          // Remapping triggers the change in an observer
+          var output = self.input.map(function (item, index) {
+            console.log(item);
+            var newColName = self.newColName(self.dateColumn, self.dateTypeTo), 
+                newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo), 
+                row = {}, 
+                keys = Object.keys(item);
+
+            keys.forEach(function (key) {
+              // if not keeping original data, do not include the original column
+              if (!self.keepOriginalData && key === self.dateColumn) {
+              } else {
+                row[key] = item[key];
+              }
             });
-          }
-          return row;
-        });
+            if (newDate) {
+              row[newColName] = newDate;
+            } else {
+              self.errors.push({
+                row: index + 1,
+                date: item[self.dateColumn]
+              });
+            }
+            return row;
+          });
+          self._setOutput(output);
+        }
       },
       newColName: function (oldColName, newFormat) {
         return oldColName + ' (' + newFormat + ')';
@@ -303,7 +319,9 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
       convertDate: function (date, currentFormat, newFormat) {
         return moment(date, currentFormat).isValid() ? moment(date, currentFormat).format(newFormat) : '';
       },
-      inputChanged: function () {
+
+      // OBSERVERS
+      _inputChanged: function () {
         var self = this;
         var firstItem = self.input[0];
         if (!firstItem) {
@@ -311,25 +329,15 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
         }
         self._dataAttributes = Object.keys(firstItem);
       },
-      dateTypeFromChanged: function () {
-        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn) {
-          this._calculateOutput();
-        }
+      /**
+       * The `lens-output-changed` event is fired whenever changes are observed in `output` 
+       * 
+       * @event lens-output-changed
+       */
+      _outputChanged: function(newValue, oldValue){
+        console.log(this.output);
+        this.fire('lens-output-changed', this.output);
       },
-      dateTypeToChanged: function () {
-        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn) {
-          this._calculateOutput();
-        }
-      },
-      dateColumnChanged: function () {
-        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn) {
-          this._calculateOutput();
-        }
-      },
-      keepOriginalDataChanged: function () {
-        console.log('changed');
-        this._calculateOutput();
-      }
     });
   </script>
 </dom-module>
