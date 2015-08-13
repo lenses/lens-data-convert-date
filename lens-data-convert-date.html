@@ -17,70 +17,11 @@ Example:
     <style>
       :host {
         display: inline-block;
-        color: black;
         font-size: 1em;
-      }
-
-      label {
-        vertical-align: top;
-        margin-top: 15px;
-        display: block;
-        color: #2fa3af;
-        font-weight: 600;
       }
 
       .small {
         font-size: 0.75em;
-      }
-
-      core-selector {
-        min-height: 10px;
-        display: inline-block;
-        max-height: 123px;
-      }
-
-      core-selector .col {
-        display: inline-block;
-        margin: 0 3px;
-        padding: 1px;
-        border: 1px solid #EEE;
-      }
-      core-selector .core-selected {
-        background-color: #ccc;
-
-      }
-
-      .selector {
-        min-height: 10px;
-        max-height: 100px;
-        overflow-y: scroll; 
-        display: inline-block;
-        border: 1px solid #EEE;
-        width: 265px;
-        cursor: pointer;
-      }
-
-      .selector div {
-        padding: 1px;
-        display: block;
-        margin: 0 3px;
-        padding: 1px;
-      }
-
-      .selector div:hover {
-        background-color: #eee;
-      }
-
-      .selector .core-selected {
-        background-color: #ccc;
-      }
-
-      #dateTypeFrom, #dateTypeTo {
-        border: 1px solid #eee; 
-        padding: 3px; 
-        width: 259px; 
-        font-size: 0.8em;
-        display: block;
       }
 
       iron-selector {
@@ -102,6 +43,16 @@ Example:
       label {
         display: block;
         margin-top: 5px;
+        font-weight: 600;
+      }
+
+      /* Input fields for custom date format */
+      #dateTypeFrom, #dateTypeTo {
+        border: 1px solid #eee; 
+        padding: 3px; 
+        width: 259px; 
+        font-size: 0.8em;
+        display: block;
       }
     </style>
     <template>
