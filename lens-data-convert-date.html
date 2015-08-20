@@ -54,6 +54,15 @@ Example:
         font-size: 0.8em;
         display: block;
       }
+
+      .progress {
+        background-color: #eee;
+        border-radius: 3px;
+        padding: 3px;
+        font-weight: 600;
+        margin: 10px auto;
+      }
+
     </style>
     <template>
     <core-style ref="theme"></core-style>
@@ -74,7 +83,7 @@ Example:
           <div class="dateItem" label="{{format.type}}"><span>{{format.type}}</span> <span class="small">(i.e. <span>{{format.example}}</span>)</span></div>
         </template>
       </iron-selector>
-      <input id="dateTypeFrom" is="core-input" placeholder="Or enter custom format" type="text" committedvalue="{{dateTypeFrom}}">
+      <input id="dateTypeFrom"  is="iron-input" placeholder="Or enter custom format"  bind-value="{{dateTypeFrom}}" value="{{dateTypeFrom}}" type="text">
       
       <!-- TO Date Type Selection -->
       <label>Select new format:</label>
@@ -83,15 +92,17 @@ Example:
           <div class="dateItem" label="{{format.type}}"><span>{{format.type}}</span> <span class="small">(i.e. <span>{{format.example}}</span>)</span></div>
         </template>
       </iron-selector>
-      <input id="dateTypeTo" is="core-input" placeholder="Or enter custom format" type="text" committedvalue="{{dateTypeTo}}">
+      <input id="dateTypeTo"  is="iron-input" placeholder="Or enter custom format"  bind-value="{{dateTypeTo}}" value="{{dateTypeTo}}" type="text">
       
       <p class="small">For more info on date formats, click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a> </p>
-      
-      <template is="dom-if" if="{{errors.length}}">
-        <p><strong><span>{{errors.length}}</span> date(s) could not be converted due to invalid format:</strong></p>
-        <template is="dom-repeat" items="{{errors}}" as="error">
-          <li><span>{{error.date}}</span> (row: <span>{{error.row}}</span>)</li>
-        </template>
+
+      <template is="dom-if" id="errors" if="{{errors.length}}">
+        <div class="progress">
+          <p><strong><span>{{errors.length}}</span> date(s) could not be converted due to invalid format:</strong></p>
+          <template is="dom-repeat" items="{{errors}}" as="error">
+            <li><span>{{error.date}}</span> (row: <span>{{error.row}}</span>)</li>
+          </template>
+        </div>
       </template>
 
      <!-- end lens-container-->
@@ -141,6 +152,12 @@ Example:
           type: Boolean,
           value: true,
           observer: '_calculateOutput'
+        },
+        errors: {
+          type: Array,
+          value: [],
+          notify: true, 
+          observer: '_errorsChanged'
         },
         _dateFormats: {
           type: Array,
@@ -227,6 +244,9 @@ Example:
           }
         }
       },
+      observers: [
+        '_errorsChanged(*)'
+      ],
       ready: function () {
         this._inputChanged();
       },
@@ -286,9 +306,14 @@ Example:
        * @event lens-output-changed
        */
       _outputChanged: function(newValue, oldValue){
-        console.log(this.output);
         this.fire('lens-output-changed', this.output);
       },
+      _errorsChanged: function(){
+
+
+        // console.log(this.$$(errors));
+        // this.$$(errors).render();
+      }
     });
   </script>
 </dom-module>
