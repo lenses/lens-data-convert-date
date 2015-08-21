@@ -65,8 +65,6 @@ Example:
 
     </style>
     <template>
-    <core-style ref="theme"></core-style>
-
     <div class="lens-container lens-data"></div>
       <!-- Column Selection -->
       <label> Date column:</label>
@@ -96,7 +94,7 @@ Example:
       
       <p class="small">For more info on date formats, click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a> </p>
 
-      <template is="dom-if" id="errors" if="{{errors.length}}">
+      <template is="dom-if" if="{{errors.length}}">
         <div class="progress">
           <p><strong><span>{{errors.length}}</span> date(s) could not be converted due to invalid format:</strong></p>
           <template is="dom-repeat" items="{{errors}}" as="error">
@@ -156,8 +154,7 @@ Example:
         errors: {
           type: Array,
           value: [],
-          notify: true, 
-          observer: '_errorsChanged'
+          notify: true        
         },
         _dateFormats: {
           type: Array,
@@ -244,9 +241,6 @@ Example:
           }
         }
       },
-      observers: [
-        '_errorsChanged(*)'
-      ],
       ready: function () {
         this._inputChanged();
       },
@@ -255,10 +249,9 @@ Example:
             inputLength = self.input.length;
         if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn) {
           self.errors = [];
-          console.log(self.input);
+          
           // Remapping triggers the change in an observer
           var output = self.input.map(function (item, index) {
-            console.log(item);
             var newColName = self.newColName(self.dateColumn, self.dateTypeTo), 
                 newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo), 
                 row = {}, 
@@ -274,10 +267,7 @@ Example:
             if (newDate) {
               row[newColName] = newDate;
             } else {
-              self.errors.push({
-                row: index + 1,
-                date: item[self.dateColumn]
-              });
+              self.push('errors',{ row: index + 1, date: item[self.dateColumn] });
             }
             return row;
           });
@@ -307,12 +297,6 @@ Example:
        */
       _outputChanged: function(newValue, oldValue){
         this.fire('lens-output-changed', this.output);
-      },
-      _errorsChanged: function(){
-
-
-        // console.log(this.$$(errors));
-        // this.$$(errors).render();
       }
     });
   </script>
