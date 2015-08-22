@@ -3,7 +3,7 @@
 <link rel="import" href="../iron-selector/iron-selector.html"> 
 
 <!--
-A data component for converting dates with moment.js. For more info on date formats,
+A data component for converting dates with Moment.js. For more info on date formats,
 click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a>.
 
 Example:
@@ -65,7 +65,8 @@ Example:
 
     </style>
     <template>
-    <div class="lens-container lens-data"></div>
+    <div class="lens-container lens-data">
+      
       <!-- Column Selection -->
       <label> Date column:</label>
       <iron-selector selected="{{dateColumn}}" attr-for-selected="label">
@@ -92,8 +93,10 @@ Example:
       </iron-selector>
       <input id="dateTypeTo"  is="iron-input" placeholder="Or enter custom format"  bind-value="{{dateTypeTo}}" value="{{dateTypeTo}}" type="text">
       
+      <!-- Footnote -->
       <p class="small">For more info on date formats, click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a> </p>
 
+      <!-- Errors -->
       <template is="dom-if" if="{{errors.length}}">
         <div class="progress">
           <p><strong><span>{{errors.length}}</span> date(s) could not be converted due to invalid format:</strong></p>
@@ -103,7 +106,7 @@ Example:
         </div>
       </template>
 
-     <!-- end lens-container-->
+    </div> <!-- end lens-container-->
 
   </template>
   <script src="../moment/min/moment.min.js"></script>
@@ -112,7 +115,9 @@ Example:
       is: 'lens-data-convert-date',
       properties: {
         /**
-         * Input data, where each item in the array is an object
+         * Input data, where each item in the array is an object.
+         * 
+         * @attribute input
          * @type Array
          * @default []
          */
@@ -122,7 +127,9 @@ Example:
           observer: '_inputChanged'
         },
         /**
-         * Output data, where each item in the array is an object
+         * Output data, where each item in the array is an object.
+         * 
+         * @attribute output
          * @type Array
          * @default []
          */
@@ -133,24 +140,57 @@ Example:
           readOnly: true,
           observer: '_outputChanged'
         },
+        /**
+         * The name of the column to search for dates within.
+         * 
+         * @attribute dateColumn
+         * @type String
+         */
         dateColumn: {
+          type: String,
           notify: true,
           observer: '_calculateOutput'
         },
+        /**
+         * The date format dates are currently in. 
+         * Acceptable date formats are listed in [Moment.js documentation](http://momentjs.com/docs/#/displaying/format/).
+         * 
+         * @attribute dateTypeFrom
+         * @type String
+         */
         dateTypeFrom: {
           notify: true,
           observer: '_calculateOutput'
         },
+        /**
+         * The date format dates should be converted to.
+         * Acceptable date formats are listed in [Moment.js documentation](http://momentjs.com/docs/#/displaying/format/).
+         * 
+         * @attribute dateTypeTo
+         * @type String
+         */
         dateTypeTo: {
           notify: true,
           observer: '_calculateOutput'
         },
-  
+        /**
+         * If true, original data is included in the output alongside.
+         * If false, the original data is replaced by the new data.
+         *
+         * @attribute keepOriginalData
+         * @type Boolean  
+         */
         keepOriginalData: {
           type: Boolean,
           value: true,
           observer: '_calculateOutput'
         },
+        /**
+         * A list of errors occurring in date format conversion.
+         *
+         * @attribute errors
+         * @type [{ date: String, row: Number }]
+         */
         errors: {
           type: Array,
           value: [],
@@ -241,12 +281,13 @@ Example:
           }
         }
       },
-      ready: function () {
-        this._inputChanged();
-      },
+      /**
+       * Recalculates output when any key inputs change.
+       */
       _calculateOutput: function () {
         var self = this, 
             inputLength = self.input.length;
+
         if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn) {
           self.errors = [];
           
@@ -258,7 +299,7 @@ Example:
                 keys = Object.keys(item);
 
             keys.forEach(function (key) {
-              // if not keeping original data, do not include the original column
+              // If not keeping original data, do not include the original column
               if (!self.keepOriginalData && key === self.dateColumn) {
               } else {
                 row[key] = item[key];
@@ -274,14 +315,32 @@ Example:
           self._setOutput(output);
         }
       },
+      /**
+       * Generates a column name for the converted dates, based on the date format chosen.
+       * 
+       * @param  {String} oldColName 
+       * @param  {String} newFormat 
+       * @return {String}
+       */
       newColName: function (oldColName, newFormat) {
         return oldColName + ' (' + newFormat + ')';
       },
+      /**
+       * Converts date with Moment.js.
+       * 
+       * @param  {String} date           Date string.
+       * @param  {String} currentFormat  Current format of date string.
+       * @param  {String} newFormat      New format of date string.
+       * @return {String}                New date string.
+       */
       convertDate: function (date, currentFormat, newFormat) {
         return moment(date, currentFormat).isValid() ? moment(date, currentFormat).format(newFormat) : '';
       },
 
-      // OBSERVERS
+      /*** OBSERVERS ***/
+      /**
+       * Recalculates column names when input changes.
+       */
       _inputChanged: function () {
         var self = this;
         var firstItem = self.input[0];
