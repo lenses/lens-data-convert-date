@@ -1,61 +1,109 @@
 <link rel="import" href="../polymer/polymer.html"> 
-<link rel="import" href="../th-theme/th-theme.html"> 
-<link rel="import" href="../core-input/core-input.html"> 
-<link rel="import" href="../core-selector/core-selector.html"> 
+<link rel="import" href="../iron-input/iron-input.html"> 
+<link rel="import" href="../iron-selector/iron-selector.html"> 
 
 <!--
-A data component for converting dates with moment.js. For more info on date formats,
+A data component for converting dates with Moment.js. For more info on date formats,
 click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a>.
 
-##### Example
+Example:
 
     <lens-data-convert-date></lens-data-convert-date>
 
-@element lens-data-convert-date
-@blurb A data component for converting dates.
-@status alpha
-@homepage http://lenses.github.io/lens-data-convert-date
+@demo
 -->
 
-<polymer-element name="lens-data-convert-date" attributes="input output dateColumn dateTypeFrom dateTypeTo">
-  <template>
-    <core-style ref="theme"></core-style>
-    <link rel="stylesheet" href="lens-data-convert-date.css">
+<dom-module id="lens-data-convert-date">
+    <style>
+      :host {
+        display: inline-block;
+        font-size: 1em;
+      }
 
-    <div class="lens-container lens-data"></div>
+      .small {
+        font-size: 0.75em;
+      }
+
+      iron-selector {
+        min-height: 10px;
+        display: inline-block;
+        max-height: 123px;
+        overflow-y: scroll; 
+      }
+
+      iron-selector .col {
+        padding: 1px;
+        border: 1px solid #EEE;
+      }
+
+      iron-selector .iron-selected {
+        background-color: #ccc;
+      }
+
+      label {
+        display: block;
+        margin-top: 5px;
+        font-weight: 600;
+      }
+
+      /* Input fields for custom date format */
+      #dateTypeFrom, #dateTypeTo {
+        border: 1px solid #eee; 
+        padding: 3px; 
+        width: 259px; 
+        font-size: 0.8em;
+        display: block;
+      }
+
+      .progress {
+        background-color: #eee;
+        border-radius: 3px;
+        padding: 3px;
+        font-weight: 600;
+        margin: 10px auto;
+      }
+
+    </style>
+    <template>
+    <div class="lens-container lens-data">
+      
       <!-- Column Selection -->
       <label> Date column:</label>
-      <core-selector selected="{{dateColumn}}" valueattr="label">
-        <template repeat="{{attr in _dataAttributes}}">
+      <iron-selector selected="{{dateColumn}}" attr-for-selected="label">
+        <template is="dom-repeat" items="{{_dataAttributes}}" as="attr">
           <div class="col" label="{{attr}}">{{attr}}</div>
         </template>
-      </core-selector>
+      </iron-selector>
       
       <!-- FROM Date Type Selection -->
       <label>Select current format:</label>
-      <core-selector class="selector" selected="{{dateTypeFrom}}"  valueattr="label">
-        <template repeat="{{format in dateFormats}}">
-          <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+      <iron-selector class="selector" selected="{{dateTypeFrom}}" attr-for-selected="label">
+        <template is="dom-repeat" items="{{_dateFormats}}" as="format">
+          <div class="dateItem" label="{{format.type}}"><span>{{format.type}}</span> <span class="small">(i.e. <span>{{format.example}}</span>)</span></div>
         </template>
-      </core-selector>
-      <input id="dateTypeFrom" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeFrom}}">
+      </iron-selector>
+      <input id="dateTypeFrom"  is="iron-input" placeholder="Or enter custom format"  bind-value="{{dateTypeFrom}}" value="{{dateTypeFrom}}" type="text">
       
       <!-- TO Date Type Selection -->
       <label>Select new format:</label>
-      <core-selector class="selector" selected="{{dateTypeTo}}" valueattr="label">
-        <template repeat="{{format in dateFormats}}">
-          <div class="dateItem" label="{{format.type}}">{{format.type}} <span class="small">(i.e. {{format.example}})</span></div>
+      <iron-selector class="selector" selected="{{dateTypeTo}}" attr-for-selected="label">
+        <template is="dom-repeat" items="{{_dateFormats}}" as="format">
+          <div class="dateItem" label="{{format.type}}"><span>{{format.type}}</span> <span class="small">(i.e. <span>{{format.example}}</span>)</span></div>
         </template>
-      </core-selector>
-      <input id="dateTypeTo" is="core-input" placeholder="Or enter custom format" type="text" committedValue="{{dateTypeTo}}">
+      </iron-selector>
+      <input id="dateTypeTo"  is="iron-input" placeholder="Or enter custom format"  bind-value="{{dateTypeTo}}" value="{{dateTypeTo}}" type="text">
       
+      <!-- Footnote -->
       <p class="small">For more info on date formats, click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">here</a> </p>
-      
-      <template if="{{errors.length}}">
-        <p><strong>{{errors.length}} date(s) could not be converted due to invalid format:</strong></p>
-        <template repeat="{{error in errors}}">
-          <li>{{error.date}} (row: {{error.row}})</li>
-        </template>
+
+      <!-- Errors -->
+      <template is="dom-if" if="{{errors.length}}">
+        <div class="progress">
+          <p><strong><span>{{errors.length}}</span> date(s) could not be converted due to invalid format:</strong></p>
+          <template is="dom-repeat" items="{{errors}}" as="error">
+            <li><span>{{error.date}}</span> (row: <span>{{error.row}}</span>)</li>
+          </template>
+        </div>
       </template>
 
     </div> <!-- end lens-container-->
@@ -64,151 +112,257 @@ click <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">he
   <script src="../moment/min/moment.min.js"></script>
   <script>
     Polymer({
-      /**
-       *  Input data
-       *
-       *  @property input
-       *  @type Array
-       *  @default [ ]
-       */
-      input: [],
-      dateFormats: [ 
-        { type: 'YYYY MM DD', example: '2015 01 31'},
-        { type: 'MMMM DD YYYY', example: 'January 31, 2015'},
-        { type: 'MMM DD YYYY', example: 'Jan 31, 2015'},
-        { type: 'MM-DD-YYYY', example: '01-31-2015'},
-        { type: 'MM-DD-YY', example: '01-31-15'},
-        { type: 'MMMM YYYY', example: 'January 2015'},
-        { type: 'MMM YYYY', example: 'Jan 2015'},
-        { type: 'MM-YYYY', example: '01-2015'},
-        { type: 'MM-YY', example: '01-15'},
-        { type: 'M-D-YYYY', example: '1-31-2015'},
-        { type: 'M-D-YY', example: '1-31-15'},
-        { type: 'DD MMMM YYYY', example: '31 January 2015'},
-        { type: 'DD-MM-YY', example: '31-01-15'},
-        { type: 'D-M-YYYY', example: '31-1-2015'},
-        { type: 'D-M-YY', example: '31-1-15'},
-        { type: 'MMM-DD', example: 'Jan-31'},
-        { type: 'MM-DD', example: '01-31'},
-        { type: 'M-D', example: '1-31'},
-        { type: 'Q YYYY', example: 'Q1 2015'}
-      ],
-
-      /**
-       *  Output data
-       *
-       *  @property output
-       *  @type Array
-       *  @default [ ]
-       */
-      output: [],
-
-      /**
-       *  Name of the column that contains dates to-be-converted.
-       *
-       *  @property dateColumn
-       *  @type String
-       *  @default null
-       */
-
-      /**
-       *  Original format of the dates to-be-converted. I.e. use
-       *  'DD MMMM YYYY' for dates in the style of '31 January 2015'
-       *
-       *  @property dateTypeFrom
-       *  @type String
-       *  @default ""
-       */
-
-      /**
-       *  Output format of the converted dates. I.e. use
-       *  'MM-DD-YY' for dates in the style of '01-31-15.'
-       *
-       *  @property dateTypeTo
-       *  @type String
-       *  @default ""
-       */
-
-      /**
-       *  If false, the original data will be replaced by the new data.
-       *  If true, original data will be included in the output alongside
-       *  the new data.
-       *
-       *  @property keepOriginalData
-       *  @type {Boolean}
-       *  @default true
-       */
-      keepOriginalData: true,
-      ready: function () {
-        this.inputChanged();
-      },
-      _calculateOutput: function(){
-        var self = this,
-            inputLength = self.input.length;
-          
-        self.errors = [];
-        
-        // Remapping triggers the change in an observer
-        self.output = self.input.map(function(item, index){
-          var newColName= self.newColName(self.dateColumn, self.dateTypeTo),
-              newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo),
-              row = {},
-              keys = Object.keys(item);
-          
-          keys.forEach(function(key) {
-
-            // if not keeping original data, do not include the original column
-            if(!self.keepOriginalData && key === self.dateColumn){
-            } else {
-              row[key] = item[key];
-            }
-          });
-        
-          if (newDate){
-            row[newColName] = newDate
-          } else {
-            self.errors.push({row: index+1, date: item[self.dateColumn]})
+      is: 'lens-data-convert-date',
+      properties: {
+        /**
+         * Input data, where each item in the array is an object.
+         * 
+         * @attribute input
+         * @type Array
+         * @default []
+         */
+        input: {
+          type: Array,
+          value: function(){ 
+            return [];
+          },
+          observer: '_inputChanged'
+        },
+        /**
+         * Output data, where each item in the array is an object.
+         * 
+         * @attribute output
+         * @type Array
+         * @default []
+         */
+        output: {
+          type: Array,
+          value: function(){ 
+            return [];
+          },
+          notify: true,
+          readOnly: true,
+          observer: '_outputChanged'
+        },
+        /**
+         * The name of the column to search for dates within.
+         * 
+         * @attribute dateColumn
+         * @type String
+         */
+        dateColumn: {
+          type: String,
+          notify: true,
+          observer: '_calculateOutput'
+        },
+        /**
+         * The date format dates are currently in. 
+         * Acceptable date formats are listed in [Moment.js documentation](http://momentjs.com/docs/#/displaying/format/).
+         * 
+         * @attribute dateTypeFrom
+         * @type String
+         */
+        dateTypeFrom: {
+          notify: true,
+          observer: '_calculateOutput'
+        },
+        /**
+         * The date format dates should be converted to.
+         * Acceptable date formats are listed in [Moment.js documentation](http://momentjs.com/docs/#/displaying/format/).
+         * 
+         * @attribute dateTypeTo
+         * @type String
+         */
+        dateTypeTo: {
+          notify: true,
+          observer: '_calculateOutput'
+        },
+        /**
+         * If true, original data is included in the output alongside.
+         * If false, the original data is replaced by the new data.
+         *
+         * @attribute keepOriginalData
+         * @type Boolean  
+         */
+        keepOriginalData: {
+          type: Boolean,
+          value: true,
+          observer: '_calculateOutput'
+        },
+        /**
+         * A list of errors occurring in date format conversion.
+         *
+         * @attribute errors
+         * @type [{ date: String, row: Number }]
+         */
+        errors: {
+          type: Array,
+          value: function(){ 
+            return [];
+          },
+          notify: true        
+        },
+        _dateFormats: {
+          type: Array,
+          readOnly: true,
+          value: function () {
+            return [
+              {
+                type: 'YYYY MM DD',
+                example: '2015 01 31'
+              },
+              {
+                type: 'MMMM DD YYYY',
+                example: 'January 31, 2015'
+              },
+              {
+                type: 'MMM DD YYYY',
+                example: 'Jan 31, 2015'
+              },
+              {
+                type: 'MM-DD-YYYY',
+                example: '01-31-2015'
+              },
+              {
+                type: 'MM-DD-YY',
+                example: '01-31-15'
+              },
+              {
+                type: 'MMMM YYYY',
+                example: 'January 2015'
+              },
+              {
+                type: 'MMM YYYY',
+                example: 'Jan 2015'
+              },
+              {
+                type: 'MM-YYYY',
+                example: '01-2015'
+              },
+              {
+                type: 'MM-YY',
+                example: '01-15'
+              },
+              {
+                type: 'M-D-YYYY',
+                example: '1-31-2015'
+              },
+              {
+                type: 'M-D-YY',
+                example: '1-31-15'
+              },
+              {
+                type: 'DD MMMM YYYY',
+                example: '31 January 2015'
+              },
+              {
+                type: 'DD-MM-YY',
+                example: '31-01-15'
+              },
+              {
+                type: 'D-M-YYYY',
+                example: '31-1-2015'
+              },
+              {
+                type: 'D-M-YY',
+                example: '31-1-15'
+              },
+              {
+                type: 'MMM-DD',
+                example: 'Jan-31'
+              },
+              {
+                type: 'MM-DD',
+                example: '01-31'
+              },
+              {
+                type: 'M-D',
+                example: '1-31'
+              },
+              {
+                type: 'Q YYYY',
+                example: 'Q1 2015'
+              }
+            ];
           }
+        }
+      },
+      /**
+       * Recalculates output when any key inputs change.
+       */
+      _calculateOutput: function () {
+        var self = this, 
+            inputLength = self.input.length;
 
-          return row;
-        })
-        
+        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn) {
+          self.errors = [];
+          
+          // Remapping triggers the change in an observer
+          var output = self.input.map(function (item, index) {
+            var newColName = self.newColName(self.dateColumn, self.dateTypeTo), 
+                newDate = self.convertDate(item[self.dateColumn], self.dateTypeFrom, self.dateTypeTo), 
+                row = {}, 
+                keys = Object.keys(item);
+
+            keys.forEach(function (key) {
+              // If not keeping original data, do not include the original column
+              if (!self.keepOriginalData && key === self.dateColumn) {
+              } else {
+                row[key] = item[key];
+              }
+            });
+            if (newDate) {
+              row[newColName] = newDate;
+            } else {
+              self.push('errors',{ row: index + 1, date: item[self.dateColumn] });
+            }
+            return row;
+          });
+          self._setOutput(output);
+        }
       },
-      newColName: function(oldColName, newFormat){
-        return oldColName + " (" + newFormat + ")";
+      /**
+       * Generates a column name for the converted dates, based on the date format chosen.
+       * 
+       * @param  {String} oldColName 
+       * @param  {String} newFormat 
+       * @return {String}
+       */
+      newColName: function (oldColName, newFormat) {
+        return oldColName + ' (' + newFormat + ')';
       },
-      convertDate: function(date, currentFormat, newFormat){
-        return moment(date,currentFormat).isValid() ? moment(date, currentFormat).format(newFormat) : "";
-        
+      /**
+       * Converts date with Moment.js.
+       * 
+       * @param  {String} date           Date string.
+       * @param  {String} currentFormat  Current format of date string.
+       * @param  {String} newFormat      New format of date string.
+       * @return {String}                New date string.
+       */
+      convertDate: function (date, currentFormat, newFormat) {
+        return moment(date, currentFormat).isValid() ? moment(date, currentFormat).format(newFormat) : '';
       },
-      inputChanged: function(){
+
+      /*** OBSERVERS ***/
+      /**
+       * Recalculates column names when input changes.
+       */
+      _inputChanged: function () {
         var self = this;
         var firstItem = self.input[0];
-        if(!firstItem) {
+        if (!firstItem) {
           return;
         }
         self._dataAttributes = Object.keys(firstItem);
       },
-      dateTypeFromChanged: function(){
-        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
-          this._calculateOutput();
-        }
-      },
-      dateTypeToChanged: function(){
-        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
-          this._calculateOutput();
-        }
-      },
-      dateColumnChanged: function(){
-        if (this.dateTypeFrom && this.dateTypeTo && this.dateColumn){
-          this._calculateOutput();
-        }
-      },
-      keepOriginalDataChanged: function() {
-        console.log('changed');
-        this._calculateOutput();
+      /**
+       * The `lens-output-changed` event is fired whenever changes are observed in `output` 
+       * 
+       * @event lens-output-changed
+       */
+      _outputChanged: function(newValue, oldValue){
+        this.fire('lens-output-changed', this.output);
       }
-
     });
   </script>
-</polymer-element>
+</dom-module>

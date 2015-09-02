@@ -1,17 +1,16 @@
 {
   "name": "lens-data-convert-date",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "keywords": "lenses, polymer, web-components",
   "main": "lens-data-convert-date.html",
   "dependencies": {
-    "th-theme": "thelmanews/th-theme",
-    "polymer": "Polymer/polymer#~0.5.5",
+    "polymer": "Polymer/polymer#^1.0.0",
     "moment": "~2.9.0",
-    "core-input": "Polymer/core-input#~0.5.5",
-    "core-selector": "Polymer/core-selector#0.5.5",
-    "core-component-page" : "Polymer/core-component-page#^0.5.5"
+    "iron-input": "polymerelements/iron-input#~1.0.4",
+    "iron-selector": "polymerelements/iron-selector#~1.0.2"
   },
   "devDependencies": {
-    "web-component-tester": "Polymer/web-component-tester#^2.2.6"
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
   }
 }
