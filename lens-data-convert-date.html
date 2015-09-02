@@ -123,7 +123,9 @@ Example:
          */
         input: {
           type: Array,
-          value: [],
+          value: function(){ 
+            return [];
+          },
           observer: '_inputChanged'
         },
         /**
@@ -135,7 +137,9 @@ Example:
          */
         output: {
           type: Array,
-          value: [],
+          value: function(){ 
+            return [];
+          },
           notify: true,
           readOnly: true,
           observer: '_outputChanged'
@@ -193,7 +197,9 @@ Example:
          */
         errors: {
           type: Array,
-          value: [],
+          value: function(){ 
+            return [];
+          },
           notify: true        
         },
         _dateFormats: {
